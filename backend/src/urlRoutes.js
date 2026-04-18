@@ -1,7 +1,7 @@
 import express from "express";
 import Url from "./urlModel.js";
 import { createShortUrl } from "./urlController.js";
-import redisClient from "./redisClient.js";
+import redis from "./redisClient.js"; // ✅ changed
 
 const router = express.Router();
 
@@ -19,19 +19,17 @@ router.get("/stats/:shortId", async (req, res) => {
   });
 });
 
-
 router.get("/:shortId", async (req, res) => {
   const { shortId } = req.params;
 
   console.log("🔥 Redirect hit:", shortId);
 
   // ✅ 1. Check Redis
-  const cachedUrl = await redisClient.get(shortId);
+  const cachedUrl = await redis.get(shortId);
 
   if (cachedUrl) {
     console.log("⚡ From Redis");
 
-    // 🔥 Still update clicks in MongoDB
     await Url.findOneAndUpdate(
       { shortId },
       { $inc: { clicks: 1 } }
@@ -47,7 +45,7 @@ router.get("/:shortId", async (req, res) => {
     console.log("🐢 From MongoDB");
 
     // Save to Redis
-    await redisClient.set(shortId, url.originalUrl);
+    await redis.set(shortId, url.originalUrl);
 
     // Increment clicks
     url.clicks++;
@@ -58,4 +56,5 @@ router.get("/:shortId", async (req, res) => {
 
   return res.status(404).json({ message: "URL not found" });
 });
+
 export default router;

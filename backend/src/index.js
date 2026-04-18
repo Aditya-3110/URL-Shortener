@@ -1,10 +1,11 @@
-import express from "express";
 import dotenv from "dotenv";
+dotenv.config(); 
+
+import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import urlRoutes from "./urlRoutes.js";
 
-dotenv.config(); // MUST be at top
 
 const app = express();
 
@@ -42,7 +43,6 @@ app.get("/stats/:shortId", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 app.listen(3001, () => {
   console.log("Server running on port 3001");
 });

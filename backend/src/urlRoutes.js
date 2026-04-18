@@ -7,6 +7,23 @@ const router = express.Router();
 
 router.post("/shorten", createShortUrl);
 
+const getOriginalUrl = async (shortId) => {
+  const cachedUrl = await redisClient.get(shortId);
+
+  if (cachedUrl) {
+    return cachedUrl;
+  }
+
+  const url = await Url.findOne({ shortId });
+
+  if (!url) {
+    return null;
+  }
+
+  await redisClient.set(shortId, url.originalUrl);
+  return url.originalUrl;
+};
+
 router.get("/stats/:shortId", async (req, res) => {
   const url = await Url.findOne({ shortId: req.params.shortId });
 
@@ -18,32 +35,31 @@ router.get("/stats/:shortId", async (req, res) => {
     clicks: url.clicks,
   });
 });
+
+router.head("/:shortId", async (req, res) => {
+  const { shortId } = req.params;
+  const originalUrl = await getOriginalUrl(shortId);
+
+  if (!originalUrl) {
+    return res.status(404).end();
+  }
+
+  return res.redirect(originalUrl);
+});
+
 router.get("/:shortId", async (req, res) => {
   const { shortId } = req.params;
+  const originalUrl = await getOriginalUrl(shortId);
 
-  const cachedUrl = await redisClient.get(shortId);
-
-  if (cachedUrl) {
-    await Url.findOneAndUpdate(
-      { shortId },
-      { $inc: { clicks: 1 } }
-    );
-
-    return res.redirect(cachedUrl);
+  if (!originalUrl) {
+    return res.status(404).json({ message: "URL not found" });
   }
 
-  const url = await Url.findOne({ shortId });
+  await Url.findOneAndUpdate(
+    { shortId },
+    { $inc: { clicks: 1 } }
+  );
 
-  if (url) {
-    await redisClient.set(shortId, url.originalUrl);
-    await Url.findOneAndUpdate(
-      { shortId },
-      { $inc: { clicks: 1 } }
-    );
-
-    return res.redirect(url.originalUrl);
-  }
-
-  return res.status(404).json({ message: "URL not found" });
+  return res.redirect(originalUrl);
 });
 export default router;

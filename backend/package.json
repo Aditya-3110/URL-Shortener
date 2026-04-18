@@ -4,7 +4,8 @@
   "type": "module",
   "main": "index.js",
  "scripts": {
-  "dev": "node -r dotenv/config src/index.js"
+  "dev": "node -r dotenv/config src/index.js",
+  "start": "node -r dotenv/config src/index.js"
 },
   "keywords": [],
   "author": "",

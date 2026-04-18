@@ -9,6 +9,10 @@ app.use(cors());
 app.use(express.json());
 app.use("/", router);
 
+app.get("/", (req, res) => {
+  res.send("🚀 URL Shortener Backend is Running");
+});
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected ✅"))
   .catch(err => console.log("Mongo Error ❌", err));

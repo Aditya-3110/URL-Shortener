@@ -11,7 +11,7 @@ function App() {
     if (!url) return;
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3001/shorten", {
+      const res = await fetch("https://url-shortener-xkmx.onrender.com/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ originalUrl: url }),
@@ -20,7 +20,7 @@ function App() {
       setShortUrl(data.shortUrl);
 
       const shortId = data.shortUrl.split("/").pop();
-      const statsRes = await fetch(`http://localhost:3001/stats/${shortId}`);
+      const statsRes = await fetch(`https://url-shortener-xkmx.onrender.com/stats/${shortId}`);
       const statsData = await statsRes.json();
       setClicks(statsData.clicks);
     } catch (err) {
@@ -33,7 +33,7 @@ function App() {
   const fetchStats = async () => {
     if (!shortUrl) return;
     const shortId = shortUrl.split("/").pop();
-    const res = await fetch(`http://localhost:3001/stats/${shortId}`);
+    const res = await fetch(`https://url-shortener-xkmx.onrender.com/stats/${shortId}`);
     const data = await res.json();
     setClicks(data.clicks);
   };
@@ -145,18 +145,18 @@ function App() {
 
 const styles = {
   page: {
-  height: "100vh", 
-  background: "#0f0c29",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "3rem 1.5rem",
-  boxSizing: "border-box", 
-  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-  position: "relative",
-  overflow: "hidden",
-},
+    height: "100vh",
+    background: "#0f0c29",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "3rem 1.5rem",
+    boxSizing: "border-box",
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    position: "relative",
+    overflow: "hidden",
+  },
   blob1: {
     position: "absolute", width: "420px", height: "420px",
     background: "#534AB7", borderRadius: "50%",

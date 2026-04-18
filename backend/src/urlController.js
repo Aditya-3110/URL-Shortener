@@ -5,11 +5,15 @@ export const createShortUrl = async (req, res) => {
   try {
     const { originalUrl } = req.body;
 
+    if (!originalUrl) {
+      return res.status(400).json({ message: "URL is required" });
+    }
+
     const existing = await Url.findOne({ originalUrl });
 
     if (existing) {
       return res.json({
-        shortUrl: `http://localhost:3001/${existing.shortId}`,
+        shortUrl: `https://url-shortener-xkmx.onrender.com/${existing.shortId}`,
       });
     }
 
@@ -23,10 +27,11 @@ export const createShortUrl = async (req, res) => {
     await newUrl.save();
 
     res.json({
-      shortUrl: `http://localhost:3001/${shortId}`,
+      shortUrl: `https://url-shortener-xkmx.onrender.com/${shortId}`,
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Error creating short URL" });
   }
 };

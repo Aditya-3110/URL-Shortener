@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+ "scripts": {
+  "dev": "node -r dotenv/config src/index.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -15,7 +15,6 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "ioredis": "^5.10.1",
     "mongoose": "^9.4.1",
     "nanoid": "^5.1.9",
     "redis": "^5.12.1"

@@ -1,9 +1,18 @@
 import { nanoid } from "nanoid";
 import Url from "./urlModel.js";
 
+const getBaseUrl = (req) => {
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL;
+  }
+
+  return `${req.protocol}://${req.get("host")}`;
+};
+
 export const createShortUrl = async (req, res) => {
   try {
     const { originalUrl } = req.body;
+    const baseUrl = getBaseUrl(req);
 
     if (!originalUrl) {
       return res.status(400).json({ message: "URL is required" });
@@ -13,7 +22,7 @@ export const createShortUrl = async (req, res) => {
 
     if (existing) {
       return res.json({
-        shortUrl: `https://url-shortener-xkmx.onrender.com/${existing.shortId}`,
+        shortUrl: `${baseUrl}/${existing.shortId}`,
       });
     }
 
@@ -27,7 +36,7 @@ export const createShortUrl = async (req, res) => {
     await newUrl.save();
 
     res.json({
-      shortUrl: `https://url-shortener-xkmx.onrender.com/${shortId}`,
+      shortUrl: `${baseUrl}/${shortId}`,
     });
 
   } catch (error) {

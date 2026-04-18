@@ -1,30 +1,40 @@
 import { useState } from "react";
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001";
+
 function App() {
   const [url, setUrl] = useState("");
   const [shortUrl, setShortUrl] = useState("");
   const [clicks, setClicks] = useState(null);
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleShorten = async () => {
     if (!url) return;
     setLoading(true);
+    setError("");
     try {
-      const res = await fetch("https://url-shortener-xkmx.onrender.com/shorten", {
+      const res = await fetch(`${API_BASE_URL}/shorten`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ originalUrl: url }),
       });
       const data = await res.json();
+
+      if (!res.ok || !data.shortUrl) {
+        throw new Error(data.message || "Failed to shorten URL");
+      }
+
       setShortUrl(data.shortUrl);
 
       const shortId = data.shortUrl.split("/").pop();
-      const statsRes = await fetch(`https://url-shortener-xkmx.onrender.com/stats/${shortId}`);
+      const statsRes = await fetch(`${API_BASE_URL}/stats/${shortId}`);
       const statsData = await statsRes.json();
       setClicks(statsData.clicks);
     } catch (err) {
       console.error(err);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -33,9 +43,19 @@ function App() {
   const fetchStats = async () => {
     if (!shortUrl) return;
     const shortId = shortUrl.split("/").pop();
-    const res = await fetch(`https://url-shortener-xkmx.onrender.com/stats/${shortId}`);
-    const data = await res.json();
-    setClicks(data.clicks);
+    try {
+      const res = await fetch(`${API_BASE_URL}/stats/${shortId}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch stats");
+      }
+
+      setClicks(data.clicks);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Something went wrong");
+    }
   };
 
   const copyToClipboard = () => {
@@ -90,6 +110,8 @@ function App() {
               {loading ? "..." : "Shorten"}
             </button>
           </div>
+
+          {error && <div style={styles.error}>{error}</div>}
 
           {shortUrl && (
             <>
@@ -222,6 +244,12 @@ const styles = {
     textTransform: "uppercase",
   },
   inputRow: { display: "flex", gap: "10px" },
+  error: {
+    color: "#FFB4B4",
+    fontSize: "13px",
+    marginTop: "10px",
+    textAlign: "left",
+  },
   input: {
     flex: 1, padding: "12px 16px", fontSize: "14px",
     border: "1px solid rgba(255,255,255,0.15)",

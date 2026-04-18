@@ -1,10 +1,12 @@
 import express from "express";
 import Url from "./urlModel.js";
 import redisClient from "./redisClient.js";
+import { createShortUrl } from "./urlController.js";
 
 const router = express.Router();
 
-// 🔥 Stats route FIRST (keep as it is)
+router.post("/shorten", createShortUrl);
+
 router.get("/stats/:shortId", async (req, res) => {
   const url = await Url.findOne({ shortId: req.params.shortId });
 
@@ -19,15 +21,9 @@ router.get("/stats/:shortId", async (req, res) => {
 router.get("/:shortId", async (req, res) => {
   const { shortId } = req.params;
 
-  console.log("🔥 Redirect hit:", shortId);
-
-  // ✅ 1. Check Redis
   const cachedUrl = await redisClient.get(shortId);
 
   if (cachedUrl) {
-    console.log("⚡ From Redis");
-
-    // 🔥 Still update clicks in MongoDB
     await Url.findOneAndUpdate(
       { shortId },
       { $inc: { clicks: 1 } }
@@ -36,18 +32,14 @@ router.get("/:shortId", async (req, res) => {
     return res.redirect(cachedUrl);
   }
 
-  // ✅ 2. Fallback to MongoDB
   const url = await Url.findOne({ shortId });
 
   if (url) {
-    console.log("🐢 From MongoDB");
-
-    // Save to Redis
     await redisClient.set(shortId, url.originalUrl);
-
-    // Increment clicks
-    url.clicks++;
-    await url.save();
+    await Url.findOneAndUpdate(
+      { shortId },
+      { $inc: { clicks: 1 } }
+    );
 
     return res.redirect(url.originalUrl);
   }

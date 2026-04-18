@@ -1,8 +1,10 @@
 import Redis from "ioredis";
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_URL, {
+  tls: {},
+});
 
 redis.on("connect", () => console.log("Redis Connected 🔥"));
-redis.on("error", (err) => console.log("Redis Error:", err));
+redis.on("error", (err) => console.log("Redis Error ❌", err));
 
 export default redis;

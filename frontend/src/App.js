@@ -112,9 +112,12 @@ function App() {
               {/* Short link */}
               <div style={styles.shortLinkLabel}>Your short link</div>
               <div style={styles.shortLinkBox}>
-                <a href={shortUrl} style={styles.shortLink}>
+                <span
+                  onClick={() => window.open(shortUrl, "_blank", "noopener,noreferrer")}
+                  style={{ ...styles.shortLink, cursor: "pointer" }}
+                >
                   {shortUrl}
-                </a>
+                </span>
                 <button
                   onClick={copyToClipboard}
                   style={copied ? { ...styles.btnSm, ...styles.btnSmSuccess } : styles.btnSm}

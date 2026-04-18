@@ -14,11 +14,14 @@ router.get("/stats/:shortId", async (req, res) => {
     const url = await Url.findOne({ shortId: req.params.shortId });
 
     if (!url) {
+      console.log("❌ Stats: URL not found");
       return res.status(404).json({ message: "Not found" });
     }
 
+    console.log("📊 Stats fetched:", url.clicks);
     res.json({ clicks: url.clicks });
   } catch (err) {
+    console.error("❌ Stats error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -27,6 +30,9 @@ router.get("/stats/:shortId", async (req, res) => {
 router.get("/:shortId", async (req, res) => {
   const { shortId } = req.params;
 
+  // 🔥 MAIN HIT LOG
+  console.log("\n🔥 REQUEST RECEIVED:", shortId, "TIME:", Date.now());
+
   try {
     let cachedUrl = null;
 
@@ -34,42 +40,52 @@ router.get("/:shortId", async (req, res) => {
     try {
       cachedUrl = await redis.get(shortId);
     } catch {
-      console.log("Redis read failed ⚠️");
+      console.log("⚠️ Redis read failed");
     }
 
+    // ✅ CASE 1: REDIS HIT
     if (cachedUrl) {
-      console.log("⚡ From Redis");
+      console.log("⚡ REDIS HIT");
 
-      await Url.findOneAndUpdate(
+      await Url.updateOne(
         { shortId },
         { $inc: { clicks: 1 } }
       );
 
+      console.log("📊 Click incremented (Redis)");
+
       return res.redirect(cachedUrl);
     }
 
-    // 🔥 Mongo fallback
+    // 🔥 CASE 2: MONGODB FALLBACK
     const url = await Url.findOne({ shortId });
 
     if (!url) {
+      console.log("❌ URL NOT FOUND");
       return res.status(404).json({ message: "URL not found" });
     }
 
-    console.log("🐢 From MongoDB");
+    console.log("🐢 MONGODB HIT");
 
     // save to Redis
     try {
       await redis.set(shortId, url.originalUrl);
+      console.log("💾 Saved to Redis");
     } catch {
-      console.log("Redis write failed ⚠️");
+      console.log("⚠️ Redis write failed");
     }
 
-    await Url.updateOne({ shortId }, { $inc: { clicks: 1 } });
-    
+    await Url.updateOne(
+      { shortId },
+      { $inc: { clicks: 1 } }
+    );
+
+    console.log("📊 Click incremented (Mongo)");
+
     return res.redirect(url.originalUrl);
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ ERROR:", error);
     return res.status(500).json({ message: "Server error" });
   }
 });

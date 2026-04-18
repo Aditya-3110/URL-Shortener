@@ -112,7 +112,7 @@ function App() {
               {/* Short link */}
               <div style={styles.shortLinkLabel}>Your short link</div>
               <div style={styles.shortLinkBox}>
-                <a href={shortUrl} target="_blank" rel="noreferrer" style={styles.shortLink}>
+                <a href={shortUrl} style={styles.shortLink}>
                   {shortUrl}
                 </a>
                 <button

@@ -10,6 +10,10 @@ A scalable and high-performance URL shortening service designed with modern web 
 
 ---
 
+🌐 Live Demo -- https://url-shortener-ashen-chi.vercel.app/
+
+---
+
 ## ✨ Key Features
 
 * 🔗 Instant URL shortening with unique ID generation

@@ -11,7 +11,7 @@ function App() {
     if (!url) return;
     setLoading(true);
     try {
-      const res = await fetch("https://linkly.onrender.com/shorten", {
+      const res = await fetch("https://url-shortener-xkmx.onrender.com/shorten", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ originalUrl: url }),
@@ -20,7 +20,7 @@ function App() {
       setShortUrl(data.shortUrl);
 
       const shortId = data.shortUrl.split("/").pop();
-      const statsRes = await fetch(`https://linkly.onrender.com/stats/${shortId}`);
+      const statsRes = await fetch(`https://url-shortener-xkmx.onrender.com/stats/${shortId}`);
       const statsData = await statsRes.json();
       setClicks(statsData.clicks);
     } catch (err) {
@@ -33,7 +33,7 @@ function App() {
   const fetchStats = async () => {
     if (!shortUrl) return;
     const shortId = shortUrl.split("/").pop();
-    const res = await fetch(`https://linkly.onrender.com/stats/${shortId}`);
+    const res = await fetch(`https://url-shortener-xkmx.onrender.com/stats/${shortId}`);
     const data = await res.json();
     setClicks(data.clicks);
   };

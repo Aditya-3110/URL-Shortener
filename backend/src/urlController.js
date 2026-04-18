@@ -13,7 +13,7 @@ export const createShortUrl = async (req, res) => {
 
     if (existing) {
       return res.json({
-        shortUrl: `https://linkly.onrender.com/${existing.shortId}`,
+        shortUrl: `https://url-shortener-xkmx.onrender.com/${existing.shortId}`,
       });
     }
 
@@ -27,7 +27,7 @@ export const createShortUrl = async (req, res) => {
     await newUrl.save();
 
     res.json({
-      shortUrl: `https://linkly.onrender.com/${shortId}`,
+      shortUrl: `https://url-shortener-xkmx.onrender.com/${shortId}`,
     });
 
   } catch (error) {

@@ -1,31 +1,7 @@
-import express from "express";
-import Url from "./urlModel.js";
-import { createShortUrl } from "./urlController.js";
-import redis from "./redisClient.js";
-
-const router = express.Router();
-
-// 🔹 Create short URL
-router.post("/shorten", createShortUrl);
-
-// 🔹 Stats
-router.get("/stats/:shortId", async (req, res) => {
-  try {
-    const url = await Url.findOne({ shortId: req.params.shortId });
-
-    if (!url) {
-      return res.status(404).json({ message: "Not found" });
-    }
-
-    res.json({ clicks: url.clicks });
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// 🔹 Redirect (Redis + MongoDB)
 router.get("/:shortId", async (req, res) => {
   const { shortId } = req.params;
+
+  console.log("🔥 Redirect hit:", shortId);
 
   try {
     let cachedUrl = null;
@@ -37,10 +13,11 @@ router.get("/:shortId", async (req, res) => {
       console.log("Redis read failed ⚠️");
     }
 
+    // ✅ FROM REDIS
     if (cachedUrl) {
       console.log("⚡ From Redis");
 
-      await Url.findOneAndUpdate(
+      await Url.updateOne(
         { shortId },
         { $inc: { clicks: 1 } }
       );
@@ -48,7 +25,7 @@ router.get("/:shortId", async (req, res) => {
       return res.redirect(cachedUrl);
     }
 
-    // 🔥 Mongo fallback
+    // 🔥 FROM MONGODB
     const url = await Url.findOne({ shortId });
 
     if (!url) {
@@ -57,15 +34,18 @@ router.get("/:shortId", async (req, res) => {
 
     console.log("🐢 From MongoDB");
 
-    // save to Redis
+    // save to Redis 
     try {
       await redis.set(shortId, url.originalUrl);
     } catch {
       console.log("Redis write failed ⚠️");
     }
 
-    url.clicks++;
-    await url.save();
+    // ✅ ONLY ONE CLICK INCREMENT
+    await Url.updateOne(
+      { shortId },
+      { $inc: { clicks: 1 } }
+    );
 
     return res.redirect(url.originalUrl);
 
@@ -74,5 +54,3 @@ router.get("/:shortId", async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
-
-export default router;

@@ -36,16 +36,16 @@ router.get("/stats/:shortId", async (req, res) => {
   });
 });
 
-router.head("/:shortId", async (req, res) => {
-  const { shortId } = req.params;
-  const originalUrl = await getOriginalUrl(shortId);
+// router.head("/:shortId", async (req, res) => {
+  //const { shortId } = req.params;
+  //const originalUrl = await getOriginalUrl(shortId);
 
-  if (!originalUrl) {
-    return res.status(404).end();
-  }
+  //if (!originalUrl) {
+    //return res.status(404).end();
+  //}
 
-  return res.redirect(originalUrl);
-});
+  //return res.redirect(originalUrl);
+//});
 
 router.get("/:shortId", async (req, res) => {
   const { shortId } = req.params;
